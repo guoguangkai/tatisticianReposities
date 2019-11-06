@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.zgx.tatistician.dao.TimerDao">
+    <!-- useGeneratedKeys设置为 true 时，表示如果插入的表id以自增列为主键，则允许 JDBC 支持自动生成主键，并可将自动生成的主键id返回。-->
+    <insert id="insertTimerBatch" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into z_timer
+        (owner,customerName,needs,mobile,department,ownerOrder,customerNum,percent)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.customerOwner},
+            #{item.customerName},
+            #{item.needs},
+            #{item.mobile},
+            #{item.OwnerDepartment},
+            #{item.order},
+            #{item.customerNum},
+            #{item.percent}
+            )
+        </foreach>
+    </insert>
+    <resultMap type="cn.zgx.tatistician.pojo.EmployeePojo" id="timerResultMap">
+    <result column="owner" property="customerOwner" />
+    <result column="customerName" property="customerName" />
+    <result column="needs" property="needs" />
+    <result column="mobile" property="mobile" />
+    <result column="owner" property="customerOwner" />
+    <result column="department" property="OwnerDepartment" />
+    <result column="ownerOrder" property="order" />
+    <result column="customerNum" property="customerNum" />
+    <result column="percent" property="percent" />
+    </resultMap>
+    <select id="getTodayData" resultMap="timerResultMap">
+        select * from z_timer where date(create_time) = curdate(); /*DATE() 函数返回日期或日期/时间表达式的日期部分。*//*CURDATE() 函数返回当前的日期2008-12-29*/
+    </select>
+    <select id="getYesterdayData" resultMap="timerResultMap">
+        SELECT * FROM `z_timer` WHERE TO_DAYS(NOW()) - TO_DAYS(create_time) = 1;
+    </select>
+    <select id="timerLikeQueryToday" resultMap="timerResultMap" parameterType="cn.zgx.tatistician.pojo.Like">
+        select * from z_timer
+        <where>
+            department like '%${dep}%' and owner like '%${name}%' and date(create_time) = curdate();
+        </where>
+        /* order by e.department desc;*/
+    </select>
+    <select id="timerLikeQueryYesterday" resultMap="timerResultMap" parameterType="cn.zgx.tatistician.pojo.Like">
+        select * from z_timer
+        <where>
+            department like '%${dep}%' and owner like '%${name}%' and TO_DAYS(NOW()) - TO_DAYS(create_time) = 1;
+        </where>
+    </select>
+    <insert id="insertCustomerNameBatch" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into z_nameInfo
+        (owner,customerName)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.owner},
+            #{item.customerName}
+            )
+        </foreach>
+    </insert>
+    <insert id="insertNeedsBatch" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into z_needsInfo
+        (owner,needs)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.owner},
+            #{item.needs}
+            )
+        </foreach>
+    </insert>
+    <insert id="insertMobileBatch" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into z_mobileInfo
+        (owner,mobile)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.owner},
+            #{item.mobile}
+            )
+        </foreach>
+    </insert>
+    <select id="queryCustomerName" resultType="java.lang.String" parameterType="java.lang.String">
+        select customerName from z_nameinfo
+        <where>
+             owner = #{owner}and date(create_time) = curdate();
+        </where>
+    </select>
+    <select id="queryNeedsBatch" resultType="java.lang.String" parameterType="java.lang.String">
+        select needs from z_needsinfo
+        <where>
+            owner = #{owner}and date(create_time) = curdate();
+        </where>
+    </select>
+    <select id="queryMobileBatch" resultType="java.lang.String" parameterType="java.lang.String">
+        select mobile from z_mobileinfo
+        <where>
+            owner = #{owner} and date(create_time) = curdate();
+        </where>
+    </select>
+</mapper>

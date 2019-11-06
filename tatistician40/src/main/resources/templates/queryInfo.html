@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<script src="js/jquery.min.js"></script>
+<link rel="stylesheet" href="http://www.zgxmall.com/html/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+<body>
+</div><div align="center"><b>——数据统计规则——</b></div>
+<div align="center" ><p style="width:1150px;height:95px;text-align:left;" readonly="readonly">
+【客户姓名】(1)输入框不能为空；(2)不能带有数字或特殊字符；(3)必须为纯中/英文名，不能混杂；(4)中文名长度不能超过4个，英文名长度不能超过20个；<br>
+【需求】(1)输入框不能为空；(2)不能有四个以上连续数字；<br>
+【手机号】(1)输入框不能为空；(2):不能包含中文、特殊字符；(3)必须满足手机号规则。<br>
+    <span style="color: red">&nbsp&nbsp不符合以上条件的客户信息，均会被自动计算为“不合格”，需要重新完善客户信息。</span></div></div>
+<div class="container" >
+    <div class="row">
+        <div class="col-md-12" align="center">
+            姓名:<input type="text" name="owner" id="owner">&nbsp&nbsp部门:<input type="text" name="department" id="department">&nbsp&nbsp<input type="button" value="点击查询" id="input" align="center">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div>分析记录总条数：<span id="all"></span></div> <div>有不规范记录的员工总数：<span id="num"></span></div><div>数据更新于时间：<span id="s_time"></span></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered" >
+                <div id="t_img" style="display: none" align="center">稍等片刻，请勿重复刷新页面<img  src="gif/timg.gif">系统正在<strong>拼命</strong>分析数据</div>
+                <thead  id="r_html">
+                <tr>
+                    <th width="400" align="center">序号</th>
+                    <th width="1000" align="center">员工所属部门</th>
+                    <th width="500" align="center">员工姓名</th>
+                    <th width="600" align="center">客户总数</th>
+                    <th width="800" align="center">未完善总数/占比</th>
+                    <th width="800" align="center">与上一天对比</th>
+                    <th width="800" align="center">客户信息(未完善)</th>
+                    <th width="650" align="center">需求(未完善)</th>
+                    <th width="700" align="center">手机号(未完善)</th>
+                </tr>
+                </thead>
+                <tbody id="by_a">
+
+                <tr>
+                    <td width="400" align="center"></td>
+                    <td width="1000" align="center"></td>
+                    <td width="500" align="center"></td>
+                    <td width="600" align="center"></td>
+                    <td width="800" align="center"></td>
+                    <td width="800" align="center"></td>
+                    <td width="800" align="center" onclick="funs(this,'customerName')"></td>
+                    <td width="650" align="center" onclick="funs(this,'needs')"></td>
+                    <td width="750" align="center" onclick="funs(this,'mobile')"></td>
+                </tr>
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    window.onload = logins();
+    function logins() {
+        var url = 'http://localhost:9999/getAllTimerData';
+        $.ajax({
+            url: url,
+            type: "GET",
+            dataType: "JSON",
+            beforeSend: function () {
+                $("#t_img").css("display","block")
+            },
+            success: function (res) {
+                var myDate = new Date;
+                var year=myDate.getFullYear();
+                var mon=myDate.getMonth() + 1;
+                var date=myDate.getDate();
+                $("#s_time").html(year + "年" + mon + "月" + date + "日 凌晨1时");
+                $("#all").html(res.total);
+                $("#num").html(res.totalAfterCheck);
+                console.log(res.total);
+                console.log(res.totalAfterCheck);
+                if (res['rows']) {
+                    $("#t_img").css("display","none");
+                    var html = '';
+                    for (var i = 0; i < res['rows'].length; i++) {
+                        html += '<tr>\n' +
+                            '                                 <td width="400" align="center"> ' + res['rows'][i]['order'] + ' </td>\n' +
+                            '                                 <td width="1000" align="left"> ' + res['rows'][i]['ownerDepartment'] + ' </td>\n' +
+                            '                                 <td width="500" align="center"> ' + res['rows'][i]['customerOwner'] + ' </td>\n' +
+                            '                                 <td width="600" align="center"> ' + res['rows'][i]['customerNum'] + ' </td>\n' +
+                            '                                 <td width="800" align="center"> ' + res['rows'][i]['percent'] + ' </td>\n'+
+                            '                                 <td width="800" align="center"> ' + res['rows'][i]['percentChange'] + ' </td>\n'+
+                            '                                 <td width="800" align="center" onclick="funs(this,\'customerName\')"><a target="_blank" href="http://localhost:9999/getDetailHtml?customerOwner='+res['rows'][i]['customerOwner']+'&col=customerName ">' + res['rows'][i]['customerName'] + '</a>  </td>\n' +
+                            '                                     <td width="650" align="center" onclick="funs(this,\'needs\')"><a target="_blank" href="http://localhost:9999/getDetailHtml?customerOwner='+res['rows'][i]['customerOwner']+'&col=needs "> ' + res['rows'][i]['needs'] + ' </a></td>\n' +
+                            '                                     <td width="750" align="center" onclick="funs(this,\'mobile\')"> <a target="_blank" href="http://localhost:9999/getDetailHtml?customerOwner='+res['rows'][i]['customerOwner']+'&col=mobile ">' + res['rows'][i]['mobile'] + '</a> </td>\n' +
+                            '\n' +
+                            '                             </tr>';
+                    }
+                    $("#r_html").append(html);
+                }
+            },
+            error: function (res) {
+                console.log(res)
+            }
+        });
+    }
+</script>
+
+<script>
+    document.getElementById("input").addEventListener("click",function () {
+        $(function(){
+            $("#t_img").css("display","block")
+            var owner=$("#owner").val();
+            var department=$("#department").val();
+            $.get("http://localhost:9999//timerQueryBy?department="+department+"&owner="+owner+"", function(res){
+                var myDate = new Date;
+                var year=myDate.getFullYear();
+                var mon=myDate.getMonth() + 1;
+                var date=myDate.getDate();
+                $("#s_time").html(year + "年" + mon + "月" + date + "日 凌晨1时");
+                $("#all").html(res.total);
+                $("#num").html(res.totalAfterCheck);
+                if (res['rows']) {
+                    $("#t_img").css("display","none");
+                    var html = '';
+                    for (var i = 0; i < res['rows'].length; i++) {
+                        html += '<tr>\n' +
+                            '                                 <td width="400" align="center"> ' + res['rows'][i]['order'] + ' </td>\n' +
+                            '                                 <td width="1000" align="left"> ' + res['rows'][i]['ownerDepartment'] + ' </td>\n' +
+                            '                                 <td width="500" align="center"> ' + res['rows'][i]['customerOwner'] + ' </td>\n' +
+                            '                                 <td width="600" align="center"> ' + res['rows'][i]['customerNum'] + ' </td>\n' +
+                            '                                 <td width="800" align="center"> ' + res['rows'][i]['percent'] + ' </td>\n'+
+                            '                                 <td width="800" align="center"> ' + res['rows'][i]['percentChange'] + ' </td>\n'+
+                            '                                 <td width="800" align="center" onclick="funs(this,\'customerName\')"><a target="_blank" href="http://localhost:9999/getDetailHtml?customerOwner='+res['rows'][i]['customerOwner']+'&col=customerName ">' + res['rows'][i]['customerName'] + '</a>  </td>\n' +
+                            '                                     <td width="650" align="center" onclick="funs(this,\'needs\')"><a target="_blank" href="http://localhost:9999/getDetailHtml?customerOwner='+res['rows'][i]['customerOwner']+'&col=needs "> ' + res['rows'][i]['needs'] + ' </a></td>\n' +
+                            '                                     <td width="750" align="center" onclick="funs(this,\'mobile\')"> <a target="_blank" href="http://localhost:9999/getDetailHtml?customerOwner='+res['rows'][i]['customerOwner']+'&col=mobile ">' + res['rows'][i]['mobile'] + '</a> </td>\n' +
+                            '\n' +
+                            '                             </tr>';
+                    }
+                    $("#r_html").html('');
+                    $("#r_html").html(' <tr>\n' +
+                        '                <th width="400" align="center">序号</th>\n' +
+                        '                <th width="1000" align="center">员工所属部门</th>\n' +
+                        '                    <th width="500" align="center">员工姓名</th>\n' +
+                        '                    <th width="600" align="center">客户总数</th>\n' +
+                        '                    <th width="800" align="center">未完善总数/占比</th>\n' +
+                        '                    <th width="800" align="center">与上一天对比</th>\n' +
+                        '                    <th width="800" align="center">客户信息(未完善)</th>\n' +
+                        '                    <th width="650" align="center">需求(未完善)</th>\n' +
+                        '                    <th width="750" align="center">手机号(未完善)</th>\n' +
+                        '                    </tr>');
+
+                    $("#r_html").append(html);
+                    $("#t_img").css("display","none")
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

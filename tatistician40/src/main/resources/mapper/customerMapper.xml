@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.zgx.tatistician.dao.CustomerDao">
+    <resultMap type="cn.zgx.tatistician.pojo.Customer" id="customerResultMap">
+        <!--<id column="guid" property="guid" />-->
+        <result column="CustomerName" property="needs" />
+        <result column="Contact" property="customerName" />
+        <result column="Owner" property="owner" />
+        <result column="Mobile" property="mobile" />
+        <association property="department" javaType="cn.zgx.tatistician.pojo.Employee">
+            <!--<id column="id"  property="id"/>-->
+            <result property="department" column="department"/>
+        </association>
+    </resultMap>
+    <select id="getAbnormalCustomerCount" resultMap="customerResultMap">
+        select c.Contact,c.CustomerName,c.Mobile,c.Owner,e.department from CustomerInfo c  left join employee e  on c.owner=e.name;/*order by e.department desc*/
+    </select>
+
+    <resultMap type="cn.zgx.tatistician.pojo.CustomerNumPojo" id="customerNumMap">
+        <result column="owner" property="owner"/>
+        <result column="num" property="customerNum" />
+    </resultMap>
+    <select id="getCustomerNumOfOwner"  resultMap="customerNumMap">
+        Select owner  ,count(1) as 'num' from customerinfo group by owner;
+    </select>
+
+    <select id="likeQuery" resultMap="customerResultMap" parameterType="cn.zgx.tatistician.pojo.Like">
+        select c.Contact,c.CustomerName,c.Mobile,c.Owner,e.department from CustomerInfo c  left join employee e  on c.owner=e.name
+        <where>
+                 e.department like '%${dep}%' and c.Owner like '%${name}%'
+        </where>
+       /* order by e.department desc;*/
+    </select>
+    <select id="getTotalCount" resultType="int">
+       select count(1) from customerinfo;
+    </select>
+</mapper>

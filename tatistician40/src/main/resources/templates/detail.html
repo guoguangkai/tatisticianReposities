@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>详情页面</title>
+</head>
+
+<body>
+<div  id="tt"></div>
+</body>
+<script src="/js/jquery.min.js"></script>
+<script>
+    window.onload = getRequest();
+    function getRequest() {
+        var url = location.search; //获取url中"?"符后的字串
+        var theRequest = new Object();
+        if (url.indexOf("?") != -1) {
+            var str = url.substr(1);
+            strs = str.split("&");
+            for(var i = 0; i < strs.length; i ++) {
+                theRequest[strs[i].split("=")[0]]=decodeURI(strs[i].split("=")[1]);
+            }
+        }
+        var customerOwner1 = theRequest["customerOwner"];
+        var col1 = theRequest["col"];
+        var url = 'http://localhost:9999/getInfoList?customerOwner=' + customerOwner1 + '&col=' + col1 + '';
+        $.ajax({
+            url: url,
+            type: "GET",
+            dataType: "JSON",
+            success: function (res) {
+                console.log(res);
+                for (var i = 0; i < res.length; i++) {
+                    var y= res[i]+'<br/>'+'<hr width="50%" align="left"/>';
+                    var q=$("#tt").html();
+                    $("#tt").html(q+y);
+                }
+
+            },
+            error: function (res) {
+                console.log(res)
+            }
+        });
+
+
+    }
+</script>
+</html>

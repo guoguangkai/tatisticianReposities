@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<script src="js/jquery.min.js"></script>
+<link rel="stylesheet" href="http://www.zgxmall.com/html/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+<body>
+
+<div class="container" >
+    <div class="row">
+        <div class="col-md-12">
+            姓名:<br>
+            <input type="text" name="owner" id="owner">
+            <br>
+            部门:<br>
+            <input type="text" name="department" id="department">
+            <br>
+            <input type="button" value="点击查询" id="input">
+            <br>
+            <br>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <div>分析记录总条数：<span id="all"></span></div>
+            <div>有不规范记录的员工总数：<span id="num"></span></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered" >
+                <div id="t_img" style="display: none" align="center"><img  src="gif/timg.gif"></div>
+                <thead  id="r_html">
+                <tr>
+                    <th width="400" align="center">序号</th>
+                    <th width="1000" align="center">员工所属部门</th>
+                    <th width="500" align="center">员工姓名</th>
+                    <th width="600" align="center">客户总数</th>
+                    <th width="600" align="center">未完善总数/占比</th>
+                    <th width="600" align="center">客户信息(未完善)</th>
+                    <th width="600" align="center">需求(未完善)</th>
+                    <th width="600" align="center">手机号(未完善)</th>
+                </tr>
+                </thead>
+                <tbody id="by_a">
+
+                <tr>
+                    <td width="400" align="center"></td>
+                    <td width="1000" align="center"></td>
+                    <td width="500" align="center"></td>
+                    <td width="600" align="center"></td>
+                    <td width="600" align="center"></td>
+                    <td width="600" align="center" onclick="funs(this,'customerName')"></td>
+                    <td width="600" align="center" onclick="funs(this,'needs')"></td>
+                    <td width="600" align="center" onclick="funs(this,'mobile')"></td>
+                </tr>
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById("input").addEventListener("click",function () {
+    $(function(){
+        var owner=$("#owner").val();
+        var department=$("#department").val();
+        $.get("http://192.168.1.163:9999/queryBy?department="+department+"&owner="+owner+"", function(res){
+            $("#all").html(res.total);
+            $("#num").html(res.totalAfterCheck);
+            console.log(res.total);
+            console.log(res.totalAfterCheck);
+            if (res['rows']) {
+                $("#t_img").css("display","none");
+                var html = '';
+                for (var i = 0; i < res['rows'].length; i++) {
+                    html += '<tr>\n' +
+                        '                                 <td width="400" align="center"> ' + res['rows'][i]['order'] + ' </td>\n' +
+                        '                                 <td width="1000" align="left"> ' + res['rows'][i]['ownerDepartment'] + ' </td>\n' +
+                        '                                 <td width="500" align="center"> ' + res['rows'][i]['customerOwner'] + ' </td>\n' +
+                        '                                 <td width="600" align="center"> ' + res['rows'][i]['customerNum'] + ' </td>\n' +
+                        '                                 <td width="600" align="center"> ' + res['rows'][i]['percent'] + ' </td>\n'+
+                        '                                 <td width="600" align="center" onclick="funs(this,\'customerName\')">' + res['rows'][i]['customerName'] + '</a>  </td>\n' +
+                        '                                     <td width="600" align="center" onclick="funs(this,\'needs\')"> ' + res['rows'][i]['needs'] + ' </a></td>\n' +
+                        '                                     <td width="600" align="center" onclick="funs(this,\'mobile\')">' + res['rows'][i]['mobile'] + '</a> </td>\n' +
+                        '\n' +
+                        '                             </tr>';
+                }
+                $("#r_html").html('');
+                $("#r_html").html(' <tr>\n' +
+                    '                <th width="400" align="center">序号</th>\n' +
+                    '                <th width="1000" align="center">员工所属部门</th>\n' +
+                    '                    <th width="500" align="center">员工姓名</th>\n' +
+                    '                    <th width="600" align="center">客户总数</th>\n' +
+                    '                    <th width="600" align="center">未完善总数/占比</th>\n' +
+                    '                    <th width="600" align="center">客户信息(未完善)</th>\n' +
+                    '                    <th width="600" align="center">需求(未完善)</th>\n' +
+                    '                    <th width="600" align="center">手机号(未完善)</th>\n' +
+                    '                    </tr>');
+
+                $("#r_html").append(html);
+            }
+        });
+    });
+    });
+</script>
+</body>
+</html>
